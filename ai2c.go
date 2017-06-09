@@ -8,13 +8,16 @@ type AI2CMessage struct {
 }
 
 type AI2C struct{
-	i2cArray  [127] *i2c.I2C
+	i2cMap    map [uint8] *i2c.I2C
 	bus       int
 	c         chan AI2CMessage
 }
 
 func (a *AI2C) getI2CPort(addr uint8) (*i2c.I2C, error){
-	if a.i2cArray[addr] == nil {
+	i2cPort, exists := a.i2cMap[addr]
+	if exists {
+		return i2cPort, nil
+	} else {
 		i2cPort, err := i2c.NewI2C(addr, a.bus)
 		if err != nil {
 			return nil, err
@@ -23,10 +26,8 @@ func (a *AI2C) getI2CPort(addr uint8) (*i2c.I2C, error){
 		i2cPort.WriteRegU8(9,0xff)
 		i2cPort.WriteRegU8(0,0)
 
-		a.i2cArray[addr] = i2cPort
+		a.i2cMap[addr] = i2cPort
 		return i2cPort, nil
-	} else {
-		return a.i2cArray[addr], nil
 	}
 }
 
@@ -41,7 +42,7 @@ func (a *AI2C) poll(){
 
 func (a *AI2C) Close(){
 	close(a.c)
-	for _, i2cPort := range a.i2cArray {
+	for _, i2cPort := range a.i2cMap {
 		if i2cPort != nil {
 			i2cPort.Close()
 		}
@@ -55,11 +56,13 @@ func (a *AI2C) Send(addr uint8, value byte){
 
 func InitAI2C(bus int) *AI2C {
 	c := make(chan AI2CMessage)
-	this := &AI2C{bus: bus, c: c}
+	i2cMap := make(map[uint8] *i2c.I2C)
+	this := &AI2C{i2cMap: i2cMap, bus: bus, c: c}
 	go this.poll()
 	return this
 }
 
+/*
 func trigger(i2c *i2c.I2C, pins []uint8){
 	var masq uint8 = 0
 	for _, pin := range pins {
@@ -72,7 +75,6 @@ func trigger(i2c *i2c.I2C, pins []uint8){
 	_ = i2c.WriteRegU8(9,255)
 }
 
-/*
 func main() {
 	ai2c := InitAI2C(1)
 

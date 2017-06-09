@@ -7,7 +7,7 @@ import (
         "github.com/d2r2/go-i2c"
 )
 
-var displayLines = [...]hd44780.ShowOptions{hd44780.SHOW_LINE_1, hd44780.SHOW_LINE_2, hd44780.SHOW_LINE_3, hd44780.SHOW_LINE_4}
+var displayLines = []hd44780.ShowOptions{hd44780.SHOW_LINE_1, hd44780.SHOW_LINE_2, hd44780.SHOW_LINE_3, hd44780.SHOW_LINE_4}
 
 func checkError(err error) {
         if err != nil {

@@ -6,33 +6,23 @@ import (
 	//"log"
 	"os"
 	"os/signal"
-	"strconv"
+//	"strconv"
 	"syscall"
 	"time"
 
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 	"github.com/d2r2/go-i2c"
+	"encoding/json"
+
 )
 
-func createOnMessageReceivedHandler(c chan []string) func(client MQTT.Client, message MQTT.Message) {
+func createOnMessageReceivedHandler(t *Trigger) func(client MQTT.Client, message MQTT.Message) {
 	return func (client MQTT.Client, message MQTT.Message) {
 		byteArray := message.Payload()
-		str := fmt.Sprintf("%s", byteArray)
-		i, err := strconv.Atoi(str)
-		if(err != nil){
-			fmt.Printf("Unknown index [%s]",str)
-		} else {
-			go func() {
-				//fmt.Printf("Received message on topic: %s\nMessage: %d\n", message.Topic(), i)
-
-				l := fmt.Sprintf("Pin[%d] on\n",i)
-				m := []string{l}
-				c <- m
-
-				fmt.Printf("Pin[%d] on\n",i)
-				time.Sleep(1 * time.Second)
-				fmt.Printf("Pin[%d] off\n",i)
-			}()
+		mesg := &TriggerMessage{}
+		if err := json.Unmarshal(byteArray,mesg); err == nil {
+			fmt.Printf("%d->%d\n",mesg.Addr, mesg.Pin)
+			t.Send(mesg.Addr, mesg.Pin)
 		}
 	}
 }
@@ -46,11 +36,14 @@ func main() {
 	i2c, _ := i2c.NewI2C(0x27, 1)
 	lcd, _ := InitALcd(i2c,lcdc)
 
+	trigger := InitTrigger(1, lcdc)
+
 	go func() {
 		<-c
 		fmt.Println("signal received, exiting")
 		i2c.Close()
 		lcd.Close()
+		trigger.Close()
 		os.Exit(0)
 	}()
 
@@ -58,8 +51,8 @@ func main() {
 
 	opts := MQTT.NewClientOptions().AddBroker("tcp://127.0.0.1:1883").SetClientID("artillery_service")
 
-	handler := createOnMessageReceivedHandler(lcdc)
-	
+	handler := createOnMessageReceivedHandler(trigger)
+
 	opts.OnConnect = func(c MQTT.Client) {
 		if token := c.Subscribe("/#", byte(1), handler); token.Wait() && token.Error() != nil {
 			panic(token.Error())
