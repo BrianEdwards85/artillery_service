@@ -1,0 +1,6 @@
+package: github.com/BrianEdwards85/artillery_service
+import:
+- package: github.com/d2r2/go-hd44780
+- package: github.com/d2r2/go-i2c
+- package: github.com/eclipse/paho.mqtt.golang
+  version: ^1.1.1

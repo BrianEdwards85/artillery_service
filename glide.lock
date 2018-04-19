@@ -1,0 +1,30 @@
+hash: 8205c2382081bacc46e816295b66e82a55033242734df33049597687a93062f6
+updated: 2018-04-19T10:51:37.591062783-05:00
+imports:
+- name: github.com/d2r2/go-hd44780
+  version: 78685e3eb26b924fd21907d3e75dccf4712edb1c
+- name: github.com/d2r2/go-i2c
+  version: a835bd4fb2d23aef05ffdaef1d9138786040e18b
+- name: github.com/d2r2/go-logger
+  version: 67c1ac7ec82dd889e96b8ff171d647c5b4e78a1f
+- name: github.com/d2r2/go-shell
+  version: 05c1cb9f3986c06b68353955b0158454c9e9b214
+  subpackages:
+  - shell
+- name: github.com/davecgh/go-spew
+  version: 8991bc29aa16c548c550c7ff78260e27b9ab7c73
+  subpackages:
+  - spew
+- name: github.com/eclipse/paho.mqtt.golang
+  version: 36d01c2b4cbeb3d2a12063e4880ce30800af9560
+  subpackages:
+  - packets
+- name: github.com/op/go-logging
+  version: 970db520ece77730c7e4724c61121037378659d9
+- name: golang.org/x/net
+  version: d41e8174641f662c5a2d1c7a5f9e828788eb8706
+  subpackages:
+  - internal/socks
+  - proxy
+  - websocket
+testImports: []
